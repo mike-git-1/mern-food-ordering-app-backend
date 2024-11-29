@@ -9,7 +9,7 @@ export const handleValidationErrors = async (
   // method from express-validator that retrieves any errors accumlated  from the req obj
   const errors = validationResult(req)
 
-  // if there are errors, repond with 400 status code and the list of errors
+  // if there are errors, repond with 400 status code and the list of errors accumlated
   if (!errors.isEmpty()) {
     res.status(400).json({ errors: errors.array() })
     return
@@ -18,7 +18,7 @@ export const handleValidationErrors = async (
   next()
 }
 
-// array of validation middlewares for all our requests
+// array of validation middlewares for user data
 // express processes each function in the array sequentially
 // 1. When a request is made, this middleware runs and checks each field against the express-validators (body())
 // 2. if a validator is invalid, it adds the error to the request object and proceeds to the next validator
@@ -32,5 +32,34 @@ export const validateMyUserRequest = [
     .withMessage("AddressLine1 must be a string"),
   body("city").isString().notEmpty().withMessage("City must be a string"),
   body("country").isString().notEmpty().withMessage("Country must be a string"),
+  handleValidationErrors,
+]
+
+// array of validation middlewares for restaurant data
+// no need to add validation for imageFile since multer handles that for us
+export const validateMyRestaurantRequest = [
+  body("restaurantName")
+    .isString()
+    .notEmpty()
+    .withMessage("Restaurant name is required"),
+  body("city").isString().notEmpty().withMessage("City is required"),
+  body("country").isString().notEmpty().withMessage("Country is required"),
+  body("deliveryPrice")
+    .isFloat({ min: 0 })
+    .withMessage("Delivery price must be a positive number"),
+  body("estimatedDeliveryTime")
+    .isInt({ min: 0 })
+    .withMessage("Estimated delivery time must be a positive integer"),
+  body("cuisines")
+    .isArray()
+    .withMessage("Cuisines must be an array")
+    .notEmpty()
+    .withMessage("Cuisines array cannot be empty"),
+  body("menuItems").isArray().withMessage("Menu items must be an array"),
+  // menuItem is an array of objects. So we add validation for the individual properties inside each object
+  body("menuItems.*.name").notEmpty().withMessage("Menu item name is required"),
+  body("menuItems.*.price")
+    .isFloat({ min: 0 })
+    .withMessage("Menu item price is required and must be a positive number"),
   handleValidationErrors,
 ]
