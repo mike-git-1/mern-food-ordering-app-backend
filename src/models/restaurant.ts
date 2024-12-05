@@ -1,12 +1,22 @@
-// In addition to AUTH0 database that stores our users, we create our own database for the users since its easier to work with
-import mongoose from "mongoose"
+import mongoose, { InferSchemaType } from "mongoose"
 
 // menuItems schema
-// the reason we define a separate schema for menuitems is so that we can generate ids for the items which will be useful later for fetching menuitem data
+// the reason we define a separate schema for menuitems is so that we can access ids for the items which will be useful later for fetching menuitem data
+// By default, MongoDB generates an _id field for each document, which is of type ObjectId. But If you explicitly define it, you override it, so we provide it with
+// The default function which will create a new ObjectId
 const menuItemSchema = new mongoose.Schema({
+  _id: {
+    type: mongoose.Schema.Types.ObjectId,
+    rquired: true,
+    default: () => new mongoose.Types.ObjectId(),
+  },
   name: { type: String, required: true },
   price: { type: Number, required: true },
 })
+
+// menuItemType will be based/inferred from the schema
+// export this so that we can reference this type when we work with menuitems in our orderController.ts
+export type MenuItemType = InferSchemaType<typeof menuItemSchema>
 
 // restaurant schema
 const restaurantSchema = new mongoose.Schema({

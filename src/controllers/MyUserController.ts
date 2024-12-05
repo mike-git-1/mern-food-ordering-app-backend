@@ -5,9 +5,6 @@ import User from "../models/user"
 // get current user from db
 const getCurrentUser = async (req: Request, res: Response) => {
   try {
-    // req.body obtained from front-end
-    const { auth0Id } = req.body
-
     // finds the 1st user with the specified userId
     // userId obtained from middleware 'jwtParse'
     const currentUser = await User.findOne({ _id: req.userId })

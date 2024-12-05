@@ -1,6 +1,33 @@
 import { Request, Response } from "express"
 import Restaurant from "../models/restaurant"
 
+// get specific restaurant (for displaying details page)
+const getRestaurant = async (req: Request, res: Response) => {
+  try {
+    // get the value of the param ':restaurantId'
+    const restaurantId = req.params.restaurantId
+
+    const restaurant = await Restaurant.findById(restaurantId)
+
+    // if no restaurant found
+    if (!restaurant) {
+      // send status code
+      res.status(404).json({ message: "Restaurant not found" })
+      // end the rquest
+      return
+    }
+
+    // converts data to json (note: json() behaves differently on server vs client-side. On server, it parses data into JSON, not a javascript obj)
+    // by default, status code is 200
+    res.json(restaurant)
+
+    // send a generic error message in JSON to the client
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: "Something went wrong" })
+  }
+}
+
 // searching for restaurants
 const searchRestaurant = async (req: Request, res: Response) => {
   try {
@@ -117,4 +144,4 @@ const searchRestaurant = async (req: Request, res: Response) => {
   }
 }
 
-export default { searchRestaurant }
+export default { searchRestaurant, getRestaurant }

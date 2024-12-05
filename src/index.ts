@@ -9,6 +9,8 @@ import mongoose from "mongoose"
 import myUserRoute from "./routes/MyUserRoute"
 import myRestaurantRoute from "./routes/MyRestaurantRoute"
 import restaurantRoute from "./routes/RestaurantRoute"
+import orderRoute from "./routes/OrderRoute"
+
 import { v2 as cloudinary } from "cloudinary"
 
 // Typescript unsure if env variable can be undefined, so it returns an error
@@ -27,9 +29,14 @@ cloudinary.config({
 
 const app = express() // create new express server
 
-// middleware that automatically parses incoming JSON data from the request body, to a javascript object
-app.use(express.json())
 app.use(cors())
+
+// in order for stripe to validate the request properly,it needs access to the raw data
+// ensuring we pass in the raw data to stripe (rather than express.json) for validation and security reasons.
+app.use("/api/order/checkout/webhook", express.raw({ type: "*/*" }))
+
+// middleware that automatically parses incoming JSON data from the request body, to a javascript object (place after the code above)
+app.use(express.json())
 
 // BASIC endpoint to our server to check if the server has successfully started
 // if you receive a response, then the server is healthy
@@ -45,6 +52,8 @@ app.use("/api/my/user", myUserRoute)
 app.use("/api/my/restaurant", myRestaurantRoute)
 
 app.use("/api/restaurant", restaurantRoute)
+
+app.use("/api/order", orderRoute)
 
 app.listen(7000, () => {
   console.log("server started on localhost:7000")
