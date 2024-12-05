@@ -16,6 +16,26 @@ const upload = multer({
   },
 })
 
+// GET requests to "/api/my/restaurant/order" for getting the orders for the logged in users restaurant
+router.get(
+  "/order",
+  // checks if user is authorized (checks access token)
+  jwtCheck,
+  // extracts/parses user id from this access token
+  jwtParse,
+  MyRestaurantController.getMyRestaurantOrders
+)
+
+// PATCH requests to "/api/my/restaurant/order" for updating part of a restaurants order (modyfing the 'status')
+router.patch(
+  "/order/:orderId/status",
+  // checks if user is authorized (checks access token)
+  jwtCheck,
+  // extracts/parses user id from this access token
+  jwtParse,
+  MyRestaurantController.updateOrderStatus
+)
+
 // GET requests to "/api/my/restaurant" will be passed to 'getMyRestaurant' fn
 router.get(
   "/",

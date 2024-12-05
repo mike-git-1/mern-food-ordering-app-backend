@@ -7,6 +7,25 @@ const STRIPE = new Stripe(process.env.STRIPE_API_KEY as string)
 const FRONTEND_URL = process.env.FRONTEND_URL as string
 const STRIPE_ENDPOINT_SECRET = process.env.STRIPE_WEBHOOK_SECRET as string
 
+// For getting list of orders for the logged in user
+const getMyOrders = async (req: Request, res: Response) => {
+  try {
+    // finds all the orders of the specified userId
+    // userId obtained from middleware 'jwtParse'
+    const orders = await Order.find({ user: req.userId })
+      // replace/populate the references with the actual restaurant and user documents
+      .populate("restaurant")
+      .populate("user")
+
+    res.json(orders)
+
+    // send a generic error message in JSON to the client
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: "Error fetching orders" })
+  }
+}
+
 // what we expect to get from the front end, an object. define the types of the req.body
 type CheckoutSessionRequest = {
   cartItems: {
@@ -199,4 +218,4 @@ const createSession = async (
   return sessionData
 }
 
-export default { createCheckoutSession, stripeWebhookHandler }
+export default { createCheckoutSession, stripeWebhookHandler, getMyOrders }
